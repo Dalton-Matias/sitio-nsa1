@@ -1668,9 +1668,38 @@ function initApp() {
   renderPlantacoes();
 }
 
+// Expor funções para o HTML (necessário com type="module")
+window.tentarLogin = tentarLogin;
+window.entrarVisitante = entrarVisitante;
+window.sairEditor = sairEditor;
+window.toggleSenha = toggleSenha;
+window.tab = tab;
+window.salvarAnimais = salvarAnimais;
+window.salvarEvento = salvarEvento;
+window.salvarPlantacao = salvarPlantacao;
+window.atualizarStatusPlantacao = atualizarStatusPlantacao;
+window.salvarColheita = salvarColheita;
+window.salvarTrato = salvarTrato;
+window.lancar = lancar;
+window.renderFinanceiro = renderFinanceiro;
+window.filtrarMesFin = filtrarMesFin;
+window.confirmarDeleteLanc = confirmarDeleteLanc;
+window.editarLancamento = editarLancamento;
+window.confirmarDeleteEvento = confirmarDeleteEvento;
+window.editarEvento = editarEvento;
+window.confirmarDeletePlantacao = confirmarDeletePlantacao;
+window.editarPlantacaoModal = editarPlantacaoModal;
+window.confirmarDeleteColheita = confirmarDeleteColheita;
+window.editarColheita = editarColheita;
+window.confirmarDeleteTrato = confirmarDeleteTrato;
+window.editarTrato = editarTrato;
+window.closeModal = closeModal;
+window.popularSelAnos = popularSelAnos;
+
 // Focar no campo de senha ao carregar
 window.addEventListener('load', () => {
-  document.getElementById('authSenha').focus();
+  const el = document.getElementById('authSenha');
+  if(el) el.focus();
 });
 </script>
 </body>
