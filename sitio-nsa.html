@@ -688,17 +688,30 @@ tbody td { padding:9px 13px; }
   </div>
 </div>
 
-<script>
+<script type="module">
+// ============================================================
+//  FIREBASE CONFIG
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCq2nRsYK8wQoB_G81LdPIFyHFG_uyfMLw",
+  authDomain: "sitio-nsa.firebaseapp.com",
+  databaseURL: "https://sitio-nsa-default-rtdb.firebaseio.com",
+  projectId: "sitio-nsa",
+  storageBucket: "sitio-nsa.firebasestorage.app",
+  messagingSenderId: "736385732111",
+  appId: "1:736385732111:web:50818da005528681f81d7a"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
+const dbRef = ref(database, 'sitio_nsa');
+
 // ============================================================
 //  STORAGE HELPERS
 // ============================================================
-const KEY = 'sitio_nsa_v2';
-
-function load() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || defaultData(); } catch(e) { return defaultData(); }
-}
-function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
-
 function defaultData() {
   return {
     animais: { bovino:{boi:0,vaca:0,bezerro:0,obs:''}, peixe:{especie:'Tilápia',qtd:0,tanques:0,obs:''}, ave:{galinha:0,galo:0,pintinho:0,pato:0,obs:''} },
@@ -710,8 +723,42 @@ function defaultData() {
   };
 }
 
-let DB = load();
+function save(d) {
+  set(dbRef, d).catch(e => console.error('Firebase save error:', e));
+}
+
+let DB = defaultData();
 let chartInstances = {};
+let appIniciado = false;
+
+// Escuta mudanças em tempo real
+onValue(dbRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    DB = data;
+    // Garantir arrays (Firebase remove arrays vazios)
+    DB.eventos     = DB.eventos     || [];
+    DB.plantacoes  = DB.plantacoes  || [];
+    DB.colheitas   = DB.colheitas   || [];
+    DB.tratos      = DB.tratos      || [];
+    DB.lancamentos = DB.lancamentos || [];
+  }
+  if (!appIniciado) {
+    appIniciado = true;
+    initApp();
+  } else {
+    // Atualizar telas em tempo real
+    renderPainel();
+    renderAnimais();
+    renderPlantacoes();
+    renderFinanceiro();
+  }
+}, (error) => {
+  console.error('Firebase error:', error);
+  // Fallback para localStorage se Firebase falhar
+  try { DB = JSON.parse(localStorage.getItem('sitio_nsa_v2')) || defaultData(); } catch(e) { DB = defaultData(); }
+  if (!appIniciado) { appIniciado = true; initApp(); }
+});
 
 // ============================================================
 //  UTILITÁRIOS
