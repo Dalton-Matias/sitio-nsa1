@@ -1,1 +1,1630 @@
-# sitio-nsa1
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sítio Nossa Senhora Aparecida — Gestão</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700;900&display=swap');
+
+:root {
+  --verde1: #1B4332;
+  --verde2: #2D6A4F;
+  --verde3: #52B788;
+  --verde4: #B7E4C7;
+  --terra: #6B3A2A;
+  --palha: #F0E6C8;
+  --ouro: #D4A017;
+  --vermelho: #9B2335;
+  --laranja: #C46200;
+  --ceu: #4A90D9;
+  --bg: #F7F3EC;
+  --card: #FFFFFF;
+  --texto: #1A1A1A;
+  --sub: #5A5A5A;
+  --borda: #E0D8C8;
+  --shadow: 0 2px 16px rgba(27,67,50,0.10);
+  --radius: 14px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--bg);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--verde1);
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  border-bottom: 4px solid var(--ouro);
+}
+.logo-area { display:flex; align-items:center; gap:14px; }
+.logo-icon { font-size:2.2rem; }
+.logo-text { font-family:'Playfair Display',serif; color:var(--palha); line-height:1.15; }
+.logo-text small { display:block; font-family:'Lato',sans-serif; font-size:0.72rem; color:var(--verde3); font-weight:400; letter-spacing:1.5px; text-transform:uppercase; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.pill { background:rgba(255,255,255,0.10); color:var(--palha); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:5px 14px; font-size:0.78rem; font-weight:700; letter-spacing:.5px; }
+.pill.ano { background:var(--ouro); color:var(--verde1); border-color:var(--ouro); }
+
+/* TABS */
+.tabs { background:var(--verde2); display:flex; padding:0 28px; gap:2px; overflow-x:auto; }
+.tab { padding:11px 20px; color:rgba(255,255,255,0.65); cursor:pointer; font-weight:700; font-size:0.82rem; border-bottom:3px solid transparent; transition:.2s; white-space:nowrap; letter-spacing:.3px; }
+.tab:hover { color:rgba(255,255,255,0.9); }
+.tab.active { color:#fff; border-bottom-color:var(--ouro); }
+
+/* MAIN */
+.main { padding:24px 28px; max-width:1500px; margin:0 auto; }
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* SECTION HEADER */
+.sec-head { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
+.sec-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--verde1); }
+.sec-title small { display:block; font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--sub); font-weight:400; margin-top:2px; }
+
+/* MES SELECTOR */
+.mes-sel { display:flex; gap:5px; flex-wrap:wrap; }
+.mes-btn { padding:5px 12px; border-radius:20px; border:2px solid var(--borda); background:white; color:var(--sub); cursor:pointer; font-family:'Lato',sans-serif; font-size:0.78rem; font-weight:700; transition:.2s; }
+.mes-btn:hover { border-color:var(--verde3); color:var(--verde1); }
+.mes-btn.active { background:var(--verde1); border-color:var(--verde1); color:#fff; }
+
+/* KPI CARDS */
+.kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin-bottom:20px; }
+.kpi { background:var(--card); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); border-left:5px solid var(--borda); transition:.2s; }
+.kpi:hover { transform:translateY(-2px); }
+.kpi.g { border-left-color:var(--verde3); }
+.kpi.r { border-left-color:var(--vermelho); }
+.kpi.o { border-left-color:var(--ouro); }
+.kpi.b { border-left-color:var(--ceu); }
+.kpi-lbl { font-size:0.72rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--sub); margin-bottom:6px; }
+.kpi-val { font-size:1.5rem; font-weight:900; color:var(--texto); line-height:1; font-variant-numeric:tabular-nums; }
+.kpi-sub { font-size:0.76rem; color:var(--sub); margin-top:5px; }
+.kpi-empty { font-size:1rem; color:#aaa; font-style:italic; }
+
+/* CHART CARD */
+.chart-card { background:var(--card); border-radius:var(--radius); padding:20px 22px; box-shadow:var(--shadow); }
+.chart-title { font-family:'Playfair Display',serif; font-size:1rem; color:var(--verde1); margin-bottom:3px; }
+.chart-sub { font-size:0.76rem; color:var(--sub); margin-bottom:14px; }
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-bottom:18px; }
+.g1 { margin-bottom:18px; }
+
+/* TABELA */
+.tbl-card { background:var(--card); border-radius:var(--radius); padding:20px 22px; box-shadow:var(--shadow); margin-bottom:18px; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+thead th { background:var(--verde1); color:var(--palha); padding:9px 13px; text-align:left; font-size:0.74rem; font-weight:900; text-transform:uppercase; letter-spacing:.7px; }
+thead th:first-child { border-radius:8px 0 0 8px; }
+thead th:last-child { border-radius:0 8px 8px 0; }
+tbody tr { border-bottom:1px solid var(--borda); transition:background .15s; }
+tbody tr:hover { background:rgba(82,183,136,0.06); }
+tbody td { padding:9px 13px; }
+.badge { padding:2px 9px; border-radius:10px; font-size:0.72rem; font-weight:900; }
+.badge-g { background:rgba(82,183,136,0.15); color:var(--verde2); }
+.badge-r { background:rgba(155,35,53,0.10); color:var(--vermelho); }
+.badge-o { background:rgba(212,160,23,0.15); color:var(--laranja); }
+.badge-b { background:rgba(74,144,217,0.12); color:var(--ceu); }
+
+/* FORMULÁRIO */
+.form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:18px; margin-bottom:18px; }
+.form-card { background:var(--card); border-radius:var(--radius); padding:22px 24px; box-shadow:var(--shadow); }
+.form-card-title { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--verde1); margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:2px solid var(--borda); padding-bottom:10px; }
+.fg { margin-bottom:13px; }
+.fg label { display:block; font-size:0.74rem; font-weight:900; color:var(--sub); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+.fg input, .fg select, .fg textarea {
+  width:100%; padding:9px 13px; border:2px solid var(--borda); border-radius:9px;
+  font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--texto); background:var(--bg);
+  transition:.2s; outline:none;
+}
+.fg input:focus, .fg select:focus { border-color:var(--verde2); background:white; }
+.fg-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.btn { border:none; padding:11px 20px; border-radius:10px; font-family:'Lato',sans-serif; font-weight:900; font-size:0.88rem; cursor:pointer; transition:.2s; width:100%; margin-top:6px; letter-spacing:.3px; }
+.btn-g { background:var(--verde1); color:white; }
+.btn-g:hover { background:var(--verde2); transform:translateY(-1px); }
+.btn-r { background:var(--vermelho); color:white; }
+.btn-r:hover { opacity:.9; }
+.btn-o { background:var(--ouro); color:var(--verde1); }
+.btn-o:hover { transform:translateY(-1px); }
+
+/* INVENTÁRIO */
+.inv-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:20px; }
+.inv-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); text-align:center; border-top:4px solid var(--borda); }
+.inv-card.verde { border-top-color:var(--verde3); }
+.inv-card.ouro { border-top-color:var(--ouro); }
+.inv-card.azul { border-top-color:var(--ceu); }
+.inv-card.terra { border-top-color:var(--terra); }
+.inv-icon { font-size:2.4rem; margin-bottom:8px; }
+.inv-nome { font-family:'Playfair Display',serif; font-size:1rem; color:var(--verde1); margin-bottom:6px; }
+.inv-qtd { font-size:2rem; font-weight:900; color:var(--texto); font-variant-numeric:tabular-nums; }
+.inv-unidade { font-size:0.76rem; color:var(--sub); margin-top:3px; }
+.inv-edit { margin-top:12px; display:flex; gap:6px; }
+.inv-edit input { flex:1; padding:6px 10px; border:1.5px solid var(--borda); border-radius:8px; font-size:0.85rem; font-family:'Lato',sans-serif; background:var(--bg); outline:none; }
+.inv-edit input:focus { border-color:var(--verde2); }
+.inv-btn { padding:6px 12px; border:none; border-radius:8px; background:var(--verde1); color:white; cursor:pointer; font-weight:900; font-size:0.82rem; }
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:48px 20px; color:var(--sub); }
+.empty-state .eicon { font-size:3rem; margin-bottom:12px; }
+.empty-state p { font-size:0.9rem; }
+
+/* TOAST */
+.toast { position:fixed; bottom:22px; right:22px; background:var(--verde1); color:white; padding:13px 20px; border-radius:12px; font-weight:700; font-size:0.88rem; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transform:translateY(16px); transition:.3s; pointer-events:none; z-index:999; border-left:4px solid var(--ouro); }
+.toast.show { opacity:1; transform:translateY(0); }
+
+/* MODALS */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; align-items:center; justify-content:center; padding:16px; }
+.overlay.show { display:flex; }
+.modal { background:white; border-radius:var(--radius); padding:28px; max-width:480px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto; }
+.modal h3 { font-family:'Playfair Display',serif; color:var(--verde1); margin-bottom:14px; font-size:1.2rem; border-bottom:2px solid var(--borda); padding-bottom:10px; }
+.modal p { font-size:0.88rem; color:var(--sub); margin-bottom:20px; }
+.modal-btns { display:flex; gap:10px; margin-top:16px; }
+.modal-btns button { flex:1; }
+/* acoes na tabela */
+.acoes { display:flex; gap:4px; }
+.btn-acao { padding:4px 10px; border:none; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:900; transition:.15s; }
+.btn-editar { background:rgba(212,160,23,0.15); color:var(--laranja); }
+.btn-editar:hover { background:var(--ouro); color:white; }
+.btn-del { background:rgba(155,35,53,0.10); color:var(--vermelho); }
+.btn-del:hover { background:var(--vermelho); color:white; }
+
+/* RESPONSIVE */
+@media(max-width:768px) {
+  .main { padding:14px; }
+  .g2,.g3 { grid-template-columns:1fr; }
+  .header { padding:12px 16px; }
+  .tabs { padding:0 12px; }
+}
+
+/* SUMMARY ROW */
+.summary-row { display:flex; align-items:center; gap:12px; background:var(--palha); border-radius:10px; padding:10px 16px; margin-bottom:14px; font-size:0.84rem; flex-wrap:wrap; }
+.summary-row b { color:var(--verde1); }
+
+/* ANO SELECTOR */
+.ano-sel { display:flex; align-items:center; gap:8px; }
+.ano-sel select { padding:6px 12px; border-radius:8px; border:2px solid var(--borda); font-family:'Lato',sans-serif; font-weight:700; font-size:0.85rem; background:white; color:var(--verde1); outline:none; }
+
+/* ── AUTH ── */
+.auth-screen {
+  position:fixed; inset:0; z-index:9999;
+  background: var(--verde1);
+  display:flex; align-items:center; justify-content:center;
+  background-image: radial-gradient(ellipse at 20% 80%, rgba(82,183,136,.18) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(212,160,23,.12) 0%, transparent 60%);
+}
+.auth-box {
+  background:white; border-radius:20px; padding:40px 36px;
+  max-width:380px; width:92%; box-shadow:0 24px 64px rgba(0,0,0,.35);
+  text-align:center; animation: authIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes authIn { from{opacity:0;transform:translateY(30px) scale(.95)} to{opacity:1;transform:none} }
+.auth-icon { font-size:3rem; margin-bottom:4px; }
+.auth-sitio { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--verde1); margin-bottom:2px; }
+.auth-sub { font-size:0.78rem; color:var(--sub); margin-bottom:24px; letter-spacing:.3px; }
+.auth-divider { display:flex; align-items:center; gap:10px; margin:18px 0; color:#bbb; font-size:.78rem; }
+.auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:#e5e5e5; }
+.auth-input-wrap { position:relative; margin-bottom:10px; }
+.auth-input-wrap input {
+  width:100%; padding:13px 44px 13px 16px; border:2px solid var(--borda);
+  border-radius:12px; font-family:'Lato',sans-serif; font-size:1rem;
+  color:var(--texto); outline:none; transition:.2s; background:var(--bg);
+}
+.auth-input-wrap input:focus { border-color:var(--verde2); background:white; }
+.auth-eye {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  cursor:pointer; font-size:1.1rem; opacity:.45; transition:.15s; user-select:none;
+}
+.auth-eye:hover { opacity:1; }
+.auth-error { color:var(--vermelho); font-size:.82rem; font-weight:700; min-height:18px; margin-bottom:6px; }
+.btn-auth {
+  width:100%; padding:14px; border:none; border-radius:12px;
+  background:var(--verde1); color:white; font-family:'Lato',sans-serif;
+  font-weight:900; font-size:1rem; cursor:pointer; transition:.2s; letter-spacing:.3px; margin-bottom:10px;
+}
+.btn-auth:hover { background:var(--verde2); transform:translateY(-1px); box-shadow:0 6px 20px rgba(27,67,50,.35); }
+.btn-guest {
+  width:100%; padding:11px; border:2px solid var(--borda); border-radius:12px;
+  background:transparent; color:var(--sub); font-family:'Lato',sans-serif;
+  font-weight:700; font-size:.88rem; cursor:pointer; transition:.2s;
+}
+.btn-guest:hover { border-color:var(--verde3); color:var(--verde1); background:rgba(82,183,136,.06); }
+/* badge modo */
+.pill.editor   { background:#2E7D32; color:#fff; border-color:#2E7D32; cursor:default; }
+.pill.visitante{ background:rgba(155,35,53,.75); color:#fff; border-color:transparent; cursor:default; }
+.btn-sair-editor {
+  background:rgba(155,35,53,.85); color:white; border:none;
+  border-radius:16px; padding:5px 12px; font-size:.75rem; font-weight:900;
+  cursor:pointer; transition:.2s; letter-spacing:.3px;
+}
+.btn-sair-editor:hover { background:var(--vermelho); }
+.aviso-leitura {
+  background:linear-gradient(135deg,#9B2335,#C46200);
+  color:white; border-radius:12px; padding:11px 18px;
+  font-size:.84rem; font-weight:700; text-align:center;
+  margin-bottom:18px; display:none; align-items:center; justify-content:center; gap:8px;
+}
+.modo-visitante .aviso-leitura { display:flex; }
+.modo-visitante .readonly-hide  { display:none !important; }
+.modo-visitante .form-card      { opacity:.35; pointer-events:none; filter:grayscale(30%); }
+.modo-visitante .btn-acao       { display:none !important; }
+.modo-visitante .btn            { opacity:.35; pointer-events:none; }
+
+</style>
+</head>
+<body>
+
+<!-- ══ TELA DE AUTENTICAÇÃO ══ -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="auth-icon">🌿</div>
+    <div class="auth-sitio">Sítio Nossa Senhora Aparecida</div>
+    <div class="auth-sub">SISTEMA DE GESTÃO RURAL</div>
+    <div class="auth-input-wrap">
+      <input type="password" id="authSenha" placeholder="Digite a senha do editor..." onkeydown="if(event.key==='Enter')tentarLogin()">
+      <span class="auth-eye" id="authEye" onclick="toggleSenha()">👁</span>
+    </div>
+    <div class="auth-error" id="authErro"></div>
+    <button class="btn-auth" onclick="tentarLogin()">🔓 Entrar como Editor</button>
+    <div class="auth-divider">ou</div>
+    <button class="btn-guest" onclick="entrarVisitante()">👁 Entrar apenas para visualizar</button>
+  </div>
+</div>
+
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-area">
+    <div class="logo-icon">🌿</div>
+    <div class="logo-text">
+      Sítio Nossa Senhora Aparecida
+      <small>Sistema de Gestão Rural</small>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="pill ano" id="anoAtual">2025</div>
+    <span class="pill" id="badgeModo" style="display:none"></span>
+    <button class="btn-sair-editor" id="btnSairEditor" style="display:none" onclick="sairEditor()">🔒 Sair</button>
+    <div class="pill" id="dataHoje"></div>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <div class="tab active"  onclick="tab('painel')">📊 Painel</div>
+  <div class="tab" onclick="tab('animais')">🐄 Animais</div>
+  <div class="tab" onclick="tab('plantacoes')">🌱 Plantações</div>
+  <div class="tab" onclick="tab('financeiro')">💰 Financeiro</div>
+  <div class="tab" onclick="tab('lancamentos')">📝 Lançamentos</div>
+  <div class="tab" onclick="tab('relatorios')">📈 Relatórios</div>
+</nav>
+
+<main class="main">
+
+<!-- ===== PAINEL GERAL ===== -->
+<div id="panel-painel" class="panel active">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Painel Geral <small>Resumo atual do Sítio Nossa Senhora Aparecida</small></div>
+    <div class="ano-sel">
+      <label style="font-weight:700;font-size:.8rem;color:var(--sub)">Ano:</label>
+      <select id="anoSel" onchange="renderPainel()"></select>
+    </div>
+  </div>
+
+  <!-- KPIs financeiros -->
+  <div class="kpis" id="kpis-financeiro"></div>
+
+  <!-- INVENTÁRIO ANIMAIS -->
+  <div class="chart-title" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--verde1);margin-bottom:12px">🐄 Rebanho & Aves</div>
+  <div class="inv-grid" id="painel-animais"></div>
+
+  <div class="chart-title" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--verde1);margin-bottom:12px;margin-top:4px">🌱 Plantações Ativas</div>
+  <div id="painel-plantacoes"></div>
+
+  <div class="g2">
+    <div class="chart-card">
+      <div class="chart-title">Receitas × Gastos por Mês</div>
+      <div class="chart-sub" id="chart-ano-label">Ano atual</div>
+      <canvas id="chartRecGasto" height="230"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribuição de Gastos</div>
+      <div class="chart-sub">Por categoria</div>
+      <canvas id="chartPizza" height="230"></canvas>
+    </div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="chart-title" style="margin-bottom:4px">Últimos Lançamentos</div>
+    <div class="chart-sub" style="margin-bottom:14px">5 registros mais recentes</div>
+    <table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th></tr></thead>
+      <tbody id="tbl-ultimos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== ANIMAIS ===== -->
+<div id="panel-animais" class="panel">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Gestão de Animais <small>Rebanho bovino, peixes e aves</small></div>
+  </div>
+
+  <div class="inv-grid" id="animais-cards"></div>
+
+  <div class="form-grid">
+    <!-- Bovinos -->
+    <div class="form-card">
+      <div class="form-card-title">🐄 Atualizar Rebanho Bovino</div>
+      <div class="fg"><label>Bois</label><input type="number" min="0" id="qtd-boi" placeholder="0"></div>
+      <div class="fg"><label>Vacas</label><input type="number" min="0" id="qtd-vaca" placeholder="0"></div>
+      <div class="fg"><label>Bezerros / Bezerras</label><input type="number" min="0" id="qtd-bezerro" placeholder="0"></div>
+      <div class="fg"><label>Observação</label><input type="text" id="obs-bovino" placeholder="Ex: Vacinação em dia, novo nascimento..."></div>
+      <button class="btn btn-g" onclick="salvarAnimais('bovino')">💾 Salvar Rebanho</button>
+    </div>
+
+    <!-- Peixes -->
+    <div class="form-card">
+      <div class="form-card-title">🐟 Atualizar Piscicultura</div>
+      <div class="fg"><label>Espécie Principal</label>
+        <select id="especie-peixe">
+          <option>Tilápia</option><option>Tambaqui</option><option>Carpa</option>
+          <option>Pintado</option><option>Matrinxã</option><option>Pacu</option><option>Outra</option>
+        </select>
+      </div>
+      <div class="fg"><label>Quantidade estimada (peixes)</label><input type="number" min="0" id="qtd-peixe" placeholder="0"></div>
+      <div class="fg"><label>Tanques / Açudes</label><input type="number" min="0" id="qtd-tanque" placeholder="0"></div>
+      <div class="fg"><label>Observação</label><input type="text" id="obs-peixe" placeholder="Ex: Fase engorda, despesca prevista..."></div>
+      <button class="btn btn-b" onclick="salvarAnimais('peixe')" style="background:var(--ceu);color:white">💾 Salvar Peixes</button>
+    </div>
+
+    <!-- Aves -->
+    <div class="form-card">
+      <div class="form-card-title">🐓 Atualizar Aves</div>
+      <div class="fg"><label>Galinhas (poedeiras)</label><input type="number" min="0" id="qtd-galinha" placeholder="0"></div>
+      <div class="fg"><label>Galos</label><input type="number" min="0" id="qtd-galo" placeholder="0"></div>
+      <div class="fg"><label>Pintinhos / Frangos</label><input type="number" min="0" id="qtd-pintinho" placeholder="0"></div>
+      <div class="fg"><label>Patos / Marrecos</label><input type="number" min="0" id="qtd-pato" placeholder="0"></div>
+      <div class="fg"><label>Observação</label><input type="text" id="obs-ave" placeholder="Ex: Produção média por dia..."></div>
+      <button class="btn btn-o" onclick="salvarAnimais('ave')">💾 Salvar Aves</button>
+    </div>
+
+    <!-- Evento animal -->
+    <div class="form-card">
+      <div class="form-card-title">📋 Registrar Evento Animal</div>
+      <div class="fg"><label>Animal</label>
+        <select id="evento-animal">
+          <option>Boi</option><option>Vaca</option><option>Bezerro/a</option>
+          <option>Peixe</option><option>Galinha</option><option>Galo</option><option>Pintinho</option><option>Pato</option>
+        </select>
+      </div>
+      <div class="fg"><label>Evento</label>
+        <select id="evento-tipo">
+          <option>Vacinação</option><option>Nascimento</option><option>Morte</option>
+          <option>Venda</option><option>Compra</option><option>Tratamento Veterinário</option>
+          <option>Pesagem</option><option>Despesca</option><option>Postura (ovos)</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Quantidade</label><input type="number" min="0" id="evento-qtd" placeholder="0"></div>
+        <div class="fg"><label>Data</label><input type="date" id="evento-data"></div>
+      </div>
+      <div class="fg"><label>Observação</label><input type="text" id="evento-obs" placeholder="Detalhes do evento..."></div>
+      <button class="btn btn-g" onclick="salvarEvento()">📝 Registrar Evento</button>
+    </div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="chart-title" style="margin-bottom:4px">Histórico de Eventos</div>
+    <div class="chart-sub" style="margin-bottom:14px">Nascimentos, vendas, vacinações, mortes...</div>
+    <table>
+      <thead><tr><th>Data</th><th>Animal</th><th>Evento</th><th>Qtd</th><th>Observação</th><th>Ações</th></tr></thead>
+      <tbody id="tbl-eventos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== PLANTAÇÕES ===== -->
+<div id="panel-plantacoes" class="panel">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Plantações <small>Pepino, Chuchu, Quiabo e demais cultivos</small></div>
+  </div>
+
+  <div id="plantacoes-cards" class="inv-grid"></div>
+
+  <div class="form-grid">
+    <div class="form-card">
+      <div class="form-card-title">🌱 Nova Plantação / Atualizar</div>
+      <div class="fg"><label>Cultura</label>
+        <select id="plt-cultura">
+          <option>Pepino</option><option>Chuchu</option><option>Quiabo</option>
+          <option>Alface</option><option>Couve</option><option>Tomate</option>
+          <option>Mandioca</option><option>Milho (consumo)</option><option>Feijão</option>
+          <option>Abóbora</option><option>Inhame</option><option>Batata-doce</option>
+          <option>Outra</option>
+        </select>
+      </div>
+      <div class="fg"><label>Nome personalizado (opcional)</label><input type="text" id="plt-nome" placeholder="Ex: Pepino Canteiro 1"></div>
+      <div class="fg-row">
+        <div class="fg"><label>Área (m² ou pés)</label><input type="number" min="0" id="plt-area" placeholder="0"></div>
+        <div class="fg"><label>Unidade</label>
+          <select id="plt-unidade"><option>m²</option><option>pés</option><option>linhas</option><option>hectare</option></select>
+        </div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Data Plantio</label><input type="date" id="plt-data-plantio"></div>
+        <div class="fg"><label>Prev. Colheita</label><input type="date" id="plt-data-colheita"></div>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="plt-status">
+          <option>Plantado</option><option>Brotando</option><option>Crescendo</option>
+          <option>Floração</option><option>Frutificação</option><option>Pronto p/ Colheita</option>
+          <option>Colhendo</option><option>Encerrado</option>
+        </select>
+      </div>
+      <div class="fg"><label>Observações</label><input type="text" id="plt-obs" placeholder="Adubação, irrigação, pragas..."></div>
+      <button class="btn btn-g" onclick="salvarPlantacao()">🌿 Salvar Plantação</button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">🚜 Registrar Colheita</div>
+      <div class="fg"><label>Plantação</label><select id="colh-plantacao"></select></div>
+      <div class="fg"><label>Data da Colheita</label><input type="date" id="colh-data"></div>
+      <div class="fg-row">
+        <div class="fg"><label>Quantidade</label><input type="number" min="0" step="0.1" id="colh-qtd" placeholder="0"></div>
+        <div class="fg"><label>Unidade</label>
+          <select id="colh-unidade"><option>kg</option><option>unidades</option><option>caixas</option><option>dúzias</option><option>sacos</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Destino</label>
+        <select id="colh-destino">
+          <option>Consumo próprio</option><option>Venda direta</option><option>Feira</option>
+          <option>Atravessador</option><option>Doação</option>
+        </select>
+      </div>
+      <div class="fg"><label>Valor recebido (R$) — se vendido</label><input type="number" min="0" step="0.01" id="colh-valor" placeholder="0,00"></div>
+      <div class="fg"><label>Observação</label><input type="text" id="colh-obs" placeholder="Qualidade, perdas, etc."></div>
+      <button class="btn btn-o" onclick="salvarColheita()">🌾 Registrar Colheita</button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">🧪 Registrar Trato / Manejo</div>
+      <div class="fg"><label>Plantação</label><select id="trato-plantacao"></select></div>
+      <div class="fg"><label>Tipo de Manejo</label>
+        <select id="trato-tipo">
+          <option>Adubação</option><option>Irrigação</option><option>Capina</option>
+          <option>Defensivo / Pulverização</option><option>Poda</option><option>Replantio</option>
+          <option>Controle de pragas</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>Data</label><input type="date" id="trato-data"></div>
+        <div class="fg"><label>Custo (R$)</label><input type="number" min="0" step="0.01" id="trato-custo" placeholder="0,00"></div>
+      </div>
+      <div class="fg"><label>Observação</label><input type="text" id="trato-obs" placeholder="Produto utilizado, dosagem..."></div>
+      <button class="btn btn-g" onclick="salvarTrato()">📋 Salvar Manejo</button>
+    </div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="chart-title" style="margin-bottom:4px">Histórico de Plantações e Colheitas</div>
+    <div class="chart-sub" style="margin-bottom:14px">Todos os registros</div>
+    <table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Plantação</th><th>Detalhe</th><th>Qtd/Valor</th><th>Ações</th></tr></thead>
+      <tbody id="tbl-plantacoes"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== FINANCEIRO ===== -->
+<div id="panel-financeiro" class="panel">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Financeiro <small>Fluxo de caixa real do sítio</small></div>
+    <div class="ano-sel">
+      <label style="font-weight:700;font-size:.8rem;color:var(--sub)">Ano:</label>
+      <select id="anoSelFin" onchange="renderFinanceiro()"></select>
+    </div>
+  </div>
+  <div class="kpis" id="kpis-fin"></div>
+
+  <div class="mes-sel" id="mes-sel-fin" style="margin-bottom:18px"></div>
+
+  <div class="g2">
+    <div class="chart-card">
+      <div class="chart-title">Receitas × Gastos Mensais</div>
+      <div class="chart-sub" id="fin-chart-label">Visão anual</div>
+      <canvas id="chartFinAnual" height="230"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Gastos por Categoria</div>
+      <div class="chart-sub">Proporção das despesas</div>
+      <canvas id="chartFinPizza" height="230"></canvas>
+    </div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="chart-title" style="margin-bottom:4px">Extrato Detalhado</div>
+    <div class="chart-sub" style="margin-bottom:14px" id="extrato-label">Todos os meses</div>
+    <table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead>
+      <tbody id="tbl-financeiro"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== LANÇAMENTOS ===== -->
+<div id="panel-lancamentos" class="panel">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Lançamentos <small>Registre todos os movimentos financeiros do sítio</small></div>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-card">
+      <div class="form-card-title">💸 Registrar Gasto / Despesa</div>
+      <div class="fg"><label>Categoria</label>
+        <select id="g-cat">
+          <option>🐄 Ração / Alimentação Animal</option>
+          <option>💊 Veterinário / Remédio</option>
+          <option>🌿 Insumos Agrícolas (Adubo/Semente)</option>
+          <option>🧴 Defensivos / Agrotóxicos</option>
+          <option>⛽ Combustível</option>
+          <option>🔧 Manutenção de Equipamento</option>
+          <option>🚜 Aluguel de Máquina</option>
+          <option>👷 Mão de Obra / Diária</option>
+          <option>💧 Água / Irrigação</option>
+          <option>⚡ Energia Elétrica</option>
+          <option>🏗️ Benfeitorias / Construção</option>
+          <option>📦 Embalagens</option>
+          <option>🔩 Ferramentas</option>
+          <option>📋 Outros</option>
+        </select>
+      </div>
+      <div class="fg"><label>Descrição</label><input type="text" id="g-desc" placeholder="Ex: Ração para bovinos 30kg..."></div>
+      <div class="fg-row">
+        <div class="fg"><label>Valor (R$)</label><input type="number" min="0" step="0.01" id="g-valor" placeholder="0,00"></div>
+        <div class="fg"><label>Data</label><input type="date" id="g-data"></div>
+      </div>
+      <div class="fg"><label>Referente a</label>
+        <select id="g-ref">
+          <option>Geral / Sítio</option><option>Bovinos</option><option>Peixes</option>
+          <option>Aves</option><option>Pepino</option><option>Chuchu</option>
+          <option>Quiabo</option><option>Outra plantação</option>
+        </select>
+      </div>
+      <div class="fg"><label>Forma de Pagamento</label>
+        <select id="g-pgto"><option>Dinheiro</option><option>PIX</option><option>Cartão</option><option>Fiado</option><option>Outro</option></select>
+      </div>
+      <button class="btn btn-r" onclick="lancar('gasto')">💸 Registrar Gasto</button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">💰 Registrar Receita / Venda</div>
+      <div class="fg"><label>Categoria</label>
+        <select id="r-cat">
+          <option>🥩 Venda de Animal (Bovino)</option>
+          <option>🐟 Venda de Peixe / Despesca</option>
+          <option>🍳 Venda de Ovos</option>
+          <option>🐔 Venda de Frango / Ave</option>
+          <option>🥒 Venda de Pepino</option>
+          <option>🥦 Venda de Chuchu</option>
+          <option>🫑 Venda de Quiabo</option>
+          <option>🌾 Venda de Outras Plantações</option>
+          <option>🥛 Venda de Leite</option>
+          <option>💵 Outras Receitas</option>
+        </select>
+      </div>
+      <div class="fg"><label>Descrição</label><input type="text" id="r-desc" placeholder="Ex: Venda de 2 bois na feira..."></div>
+      <div class="fg-row">
+        <div class="fg"><label>Valor (R$)</label><input type="number" min="0" step="0.01" id="r-valor" placeholder="0,00"></div>
+        <div class="fg"><label>Data</label><input type="date" id="r-data"></div>
+      </div>
+      <div class="fg"><label>Comprador / Destino</label><input type="text" id="r-comprador" placeholder="Ex: Feira, vizinho, frigorífico..."></div>
+      <div class="fg"><label>Quantidade vendida</label><input type="text" id="r-qtd" placeholder="Ex: 2 bois, 50 kg pepino..."></div>
+      <button class="btn btn-g" onclick="lancar('receita')">💰 Registrar Receita</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIOS ===== -->
+<div id="panel-relatorios" class="panel">
+  <div class="aviso-leitura">👁 Modo Visitante — Visualização apenas, sem permissão de edição ou lançamentos.</div>
+  <div class="sec-head">
+    <div class="sec-title">Relatórios <small>Análise de desempenho do sítio</small></div>
+    <div class="ano-sel">
+      <label style="font-weight:700;font-size:.8rem;color:var(--sub)">Ano:</label>
+      <select id="anoSelRel" onchange="renderRelatorios()"></select>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis-rel"></div>
+
+  <div class="g3">
+    <div class="chart-card">
+      <div class="chart-title">Saldo Acumulado</div>
+      <div class="chart-sub">Evolução do resultado no ano</div>
+      <canvas id="chartSaldo" height="210"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Receitas por Origem</div>
+      <div class="chart-sub">Onde o sítio ganha mais</div>
+      <canvas id="chartRecOrigem" height="210"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Gastos por Categoria</div>
+      <div class="chart-sub">Onde mais se gasta</div>
+      <canvas id="chartGastoCat" height="210"></canvas>
+    </div>
+  </div>
+
+  <div class="tbl-card">
+    <div class="chart-title" style="margin-bottom:4px">Resumo Mensal — DRE Simplificado</div>
+    <div class="chart-sub" style="margin-bottom:14px">Receitas, gastos e resultado mês a mês</div>
+    <table>
+      <thead><tr><th>Mês</th><th>Receitas</th><th>Gastos</th><th>Resultado</th><th>Saldo Acum.</th></tr></thead>
+      <tbody id="tbl-dre"></tbody>
+    </table>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL GENÉRICO -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-box">
+    <h3 id="modal-titulo">Modal</h3>
+    <div id="modal-corpo"></div>
+    <div class="modal-btns" id="modal-btns"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  STORAGE HELPERS
+// ============================================================
+const KEY = 'sitio_nsa_v2';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || defaultData(); } catch(e) { return defaultData(); }
+}
+function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+
+function defaultData() {
+  return {
+    animais: { bovino:{boi:0,vaca:0,bezerro:0,obs:''}, peixe:{especie:'Tilápia',qtd:0,tanques:0,obs:''}, ave:{galinha:0,galo:0,pintinho:0,pato:0,obs:''} },
+    eventos: [],
+    plantacoes: [],
+    colheitas: [],
+    tratos: [],
+    lancamentos: []
+  };
+}
+
+let DB = load();
+let chartInstances = {};
+
+// ============================================================
+//  UTILITÁRIOS
+// ============================================================
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_CURTO = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function fmtBRL(v) {
+  return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtDate(s) {
+  if(!s) return '—';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+function hoje() {
+  return new Date().toISOString().slice(0,10);
+}
+function toast(msg, cor='var(--verde1)') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = cor;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+function anosDisponiveis() {
+  const anos = new Set();
+  const anoAtual = new Date().getFullYear();
+  anos.add(anoAtual);
+  DB.lancamentos.forEach(l => { if(l.data) anos.add(parseInt(l.data.slice(0,4))); });
+  return [...anos].sort((a,b)=>b-a);
+}
+function popularSelAnos() {
+  ['anoSel','anoSelFin','anoSelRel'].forEach(id => {
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const atual = sel.value || new Date().getFullYear().toString();
+    sel.innerHTML = '';
+    anosDisponiveis().forEach(a => {
+      const o = document.createElement('option');
+      o.value = a; o.textContent = a;
+      if(a.toString()===atual) o.selected=true;
+      sel.appendChild(o);
+    });
+  });
+}
+
+function destroyChart(id) {
+  if(chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+function newChart(id, type, data, options={}) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if(!ctx) return;
+  chartInstances[id] = new Chart(ctx, { type, data, options:{ responsive:true, plugins:{legend:{position:'top'}}, ...options } });
+}
+
+const VERDE  = 'rgba(46,125,50,0.82)';
+const VERDE2 = 'rgba(82,183,136,0.82)';
+const VERM   = 'rgba(155,35,53,0.82)';
+const OURO   = 'rgba(212,160,23,0.9)';
+const CEU    = 'rgba(74,144,217,0.82)';
+const LARNJ  = 'rgba(196,98,0,0.85)';
+const PALETAS= [VERDE,VERM,OURO,CEU,LARNJ,'rgba(142,68,173,.8)','rgba(52,73,94,.8)','rgba(149,165,166,.8)','rgba(39,174,96,.8)','rgba(41,128,185,.8)','rgba(231,76,60,.8)','rgba(243,156,18,.8)'];
+
+// ============================================================
+//  TABS
+// ============================================================
+function tab(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const ids=['painel','animais','plantacoes','financeiro','lancamentos','relatorios'];
+  document.querySelectorAll('.tab')[ids.indexOf(id)].classList.add('active');
+  if(id==='painel') renderPainel();
+  if(id==='animais') renderAnimais();
+  if(id==='plantacoes') renderPlantacoes();
+  if(id==='financeiro') renderFinanceiro();
+  if(id==='relatorios') renderRelatorios();
+}
+
+// ============================================================
+//  ANIMAIS
+// ============================================================
+function salvarAnimais(tipo) {
+  if(tipo==='bovino') {
+    DB.animais.bovino = {
+      boi: +document.getElementById('qtd-boi').value||0,
+      vaca: +document.getElementById('qtd-vaca').value||0,
+      bezerro: +document.getElementById('qtd-bezerro').value||0,
+      obs: document.getElementById('obs-bovino').value,
+    };
+  } else if(tipo==='peixe') {
+    DB.animais.peixe = {
+      especie: document.getElementById('especie-peixe').value,
+      qtd: +document.getElementById('qtd-peixe').value||0,
+      tanques: +document.getElementById('qtd-tanque').value||0,
+      obs: document.getElementById('obs-peixe').value,
+    };
+  } else {
+    DB.animais.ave = {
+      galinha: +document.getElementById('qtd-galinha').value||0,
+      galo: +document.getElementById('qtd-galo').value||0,
+      pintinho: +document.getElementById('qtd-pintinho').value||0,
+      pato: +document.getElementById('qtd-pato').value||0,
+      obs: document.getElementById('obs-ave').value,
+    };
+  }
+  save(DB);
+  toast('✅ Dados de animais salvos!');
+  renderAnimais();
+  renderPainelAnimais();
+}
+
+function salvarEvento() {
+  const ev = {
+    id: uid(),
+    animal: document.getElementById('evento-animal').value,
+    tipo: document.getElementById('evento-tipo').value,
+    qtd: +document.getElementById('evento-qtd').value||0,
+    data: document.getElementById('evento-data').value||hoje(),
+    obs: document.getElementById('evento-obs').value,
+  };
+  if(!ev.animal){toast('⚠️ Preencha os dados','var(--vermelho)'); return;}
+  DB.eventos.unshift(ev);
+  save(DB);
+  toast('✅ Evento registrado!');
+  renderAnimais();
+}
+
+function renderAnimais() {
+  const b = DB.animais.bovino;
+  const p = DB.animais.peixe;
+  const a = DB.animais.ave;
+  // preencher campos
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
+  set('qtd-boi',b.boi); set('qtd-vaca',b.vaca); set('qtd-bezerro',b.bezerro); set('obs-bovino',b.obs);
+  set('qtd-peixe',p.qtd); set('qtd-tanque',p.tanques); set('obs-peixe',p.obs);
+  set('qtd-galinha',a.galinha); set('qtd-galo',a.galo); set('qtd-pintinho',a.pintinho); set('qtd-pato',a.pato); set('obs-ave',a.obs);
+
+  // cards
+  const grid = document.getElementById('animais-cards');
+  grid.innerHTML = `
+    <div class="inv-card verde"><div class="inv-icon">🐂</div><div class="inv-nome">Bois</div><div class="inv-qtd">${b.boi}</div><div class="inv-unidade">cabeças</div></div>
+    <div class="inv-card verde"><div class="inv-icon">🐄</div><div class="inv-nome">Vacas</div><div class="inv-qtd">${b.vaca}</div><div class="inv-unidade">cabeças</div></div>
+    <div class="inv-card verde"><div class="inv-icon">🐮</div><div class="inv-nome">Bezerros/as</div><div class="inv-qtd">${b.bezerro}</div><div class="inv-unidade">cabeças</div></div>
+    <div class="inv-card azul"><div class="inv-icon">🐟</div><div class="inv-nome">${p.especie||'Peixes'}</div><div class="inv-qtd">${p.qtd}</div><div class="inv-unidade">${p.tanques} tanque(s)</div></div>
+    <div class="inv-card ouro"><div class="inv-icon">🐓</div><div class="inv-nome">Galinhas</div><div class="inv-qtd">${a.galinha}</div><div class="inv-unidade">poedeiras</div></div>
+    <div class="inv-card ouro"><div class="inv-icon">🐔</div><div class="inv-nome">Galos</div><div class="inv-qtd">${a.galo}</div><div class="inv-unidade">un</div></div>
+    ${a.pintinho>0?`<div class="inv-card ouro"><div class="inv-icon">🐣</div><div class="inv-nome">Pintinhos/Frangos</div><div class="inv-qtd">${a.pintinho}</div><div class="inv-unidade">un</div></div>`:''}
+    ${a.pato>0?`<div class="inv-card terra"><div class="inv-icon">🦆</div><div class="inv-nome">Patos/Marrecos</div><div class="inv-qtd">${a.pato}</div><div class="inv-unidade">un</div></div>`:''}
+  `;
+
+  // tabela eventos
+  const tbl = document.getElementById('tbl-eventos');
+  if(!DB.eventos.length) {
+    tbl.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-style:italic">Nenhum evento registrado ainda.</td></tr>';
+    return;
+  }
+  tbl.innerHTML = DB.eventos.slice(0,100).map(e=>`
+    <tr>
+      <td>${fmtDate(e.data)}</td>
+      <td><span class="badge badge-g">${e.animal}</span></td>
+      <td><span class="badge badge-o">${e.tipo}</span></td>
+      <td>${e.qtd||'—'}</td>
+      <td>${e.obs||'—'}</td>
+      <td><div class="acoes">
+        <button class="btn-acao btn-editar" onclick="editarEvento('${e.id}')">✏️ Editar</button>
+        <button class="btn-acao btn-del" onclick="confirmarDeleteEvento('${e.id}')">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ============================================================
+//  PLANTAÇÕES
+// ============================================================
+function salvarPlantacao() {
+  const cultura = document.getElementById('plt-cultura').value;
+  const nome = document.getElementById('plt-nome').value || cultura;
+  const plt = {
+    id: uid(),
+    cultura, nome,
+    area: +document.getElementById('plt-area').value||0,
+    unidade: document.getElementById('plt-unidade').value,
+    dataPlantio: document.getElementById('plt-data-plantio').value,
+    dataColheita: document.getElementById('plt-data-colheita').value,
+    status: document.getElementById('plt-status').value,
+    obs: document.getElementById('plt-obs').value,
+    ativa: true,
+  };
+  DB.plantacoes.push(plt);
+  save(DB);
+  toast('🌿 Plantação registrada!');
+  renderPlantacoes();
+  popularSelectPlantacoes();
+}
+
+function atualizarStatusPlantacao(id, status) {
+  const p = DB.plantacoes.find(x=>x.id===id);
+  if(p) { p.status=status; save(DB); renderPlantacoes(); }
+}
+
+function salvarColheita() {
+  const pid = document.getElementById('colh-plantacao').value;
+  const plt = DB.plantacoes.find(p=>p.id===pid);
+  if(!pid) { toast('⚠️ Selecione uma plantação','var(--vermelho)'); return; }
+  const colh = {
+    id: uid(),
+    plantacaoId: pid,
+    plantacaoNome: plt?.nome||pid,
+    data: document.getElementById('colh-data').value||hoje(),
+    qtd: +document.getElementById('colh-qtd').value||0,
+    unidade: document.getElementById('colh-unidade').value,
+    destino: document.getElementById('colh-destino').value,
+    valor: +document.getElementById('colh-valor').value||0,
+    obs: document.getElementById('colh-obs').value,
+  };
+  DB.colheitas.unshift(colh);
+  // se vendido, gerar lançamento automaticamente
+  if(colh.valor>0) {
+    DB.lancamentos.unshift({
+      id: uid(), tipo:'receita',
+      categoria:`🌾 Venda de ${plt?.cultura||'Plantação'}`,
+      descricao: `Colheita de ${plt?.nome||'plantação'} — ${colh.qtd} ${colh.unidade} (${colh.destino})`,
+      valor: colh.valor, data: colh.data, ref: plt?.nome, pgto: 'Dinheiro'
+    });
+  }
+  save(DB);
+  toast('🌾 Colheita registrada!');
+  renderPlantacoes();
+}
+
+function salvarTrato() {
+  const pid = document.getElementById('trato-plantacao').value;
+  const plt = DB.plantacoes.find(p=>p.id===pid);
+  if(!pid) { toast('⚠️ Selecione uma plantação','var(--vermelho)'); return; }
+  const t = {
+    id: uid(), plantacaoId:pid, plantacaoNome:plt?.nome||pid,
+    tipo: document.getElementById('trato-tipo').value,
+    data: document.getElementById('trato-data').value||hoje(),
+    custo: +document.getElementById('trato-custo').value||0,
+    obs: document.getElementById('trato-obs').value,
+  };
+  DB.tratos.unshift(t);
+  if(t.custo>0) {
+    DB.lancamentos.unshift({
+      id:uid(), tipo:'gasto',
+      categoria:'🌿 Insumos Agrícolas (Adubo/Semente)',
+      descricao:`${t.tipo} em ${plt?.nome||'plantação'}`,
+      valor:t.custo, data:t.data, ref:plt?.nome, pgto:'Dinheiro'
+    });
+  }
+  save(DB);
+  toast('📋 Manejo registrado!');
+  renderPlantacoes();
+}
+
+function popularSelectPlantacoes() {
+  ['colh-plantacao','trato-plantacao'].forEach(id => {
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const ativas = DB.plantacoes.filter(p=>p.ativa!==false);
+    if(!ativas.length) { sel.innerHTML='<option value="">— Nenhuma plantação —</option>'; return; }
+    sel.innerHTML = ativas.map(p=>`<option value="${p.id}">${p.nome} (${p.status})</option>`).join('');
+  });
+}
+
+function renderPlantacoes() {
+  popularSelectPlantacoes();
+  const ativas = DB.plantacoes.filter(p=>p.ativa!==false);
+  const grid = document.getElementById('plantacoes-cards');
+  if(!ativas.length) {
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="eicon">🌱</div><p>Nenhuma plantação registrada ainda. Use o formulário abaixo.</p></div>';
+  } else {
+    const icoMap = {Pepino:'🥒',Chuchu:'🥦',Quiabo:'🫑',Alface:'🥬',Couve:'🥦',Tomate:'🍅',Mandioca:'🍠',Milho:'🌽',Feijão:'🫘',Abóbora:'🎃',Inhame:'🫚',Batata:'🥔'};
+    grid.innerHTML = ativas.map(p=>{
+      const ico = Object.entries(icoMap).find(([k])=>p.cultura.includes(k))?.[1]||'🌿';
+      const corClass = p.status==='Colhendo'||p.status==='Pronto p/ Colheita' ? 'ouro' : p.status==='Encerrado' ? 'terra' : 'verde';
+      return `<div class="inv-card ${corClass}">
+        <div class="inv-icon">${ico}</div>
+        <div class="inv-nome">${p.nome}</div>
+        <div class="inv-qtd" style="font-size:1.1rem">${p.status}</div>
+        <div class="inv-unidade">${p.area} ${p.unidade} · Plantio: ${fmtDate(p.dataPlantio)}</div>
+        ${p.dataColheita?`<div class="inv-unidade">Colheita prevista: ${fmtDate(p.dataColheita)}</div>`:''}
+        ${p.obs?`<div class="inv-unidade" style="margin-top:4px;font-style:italic">${p.obs}</div>`:''}
+        <div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap;justify-content:center">
+          <select style="padding:4px 8px;border-radius:6px;border:1.5px solid var(--borda);font-size:0.75rem;background:var(--bg)" onchange="atualizarStatusPlantacao('${p.id}',this.value)">
+            ${['Plantado','Brotando','Crescendo','Floração','Frutificação','Pronto p/ Colheita','Colhendo','Encerrado'].map(s=>`<option${s===p.status?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // tabela histórico — 3 origens: plantação cadastrada, colheita e trato/manejo
+  const rowsPlt = DB.plantacoes.map(p=>({
+    id: p.id, origem:'plantacao', data: p.dataPlantio||'',
+    tipo:'🌱 Plantação',
+    badgeCls:'badge-g',
+    nome: p.nome,
+    detalhe:`${p.cultura} · ${p.area} ${p.unidade} · Status: ${p.status}${p.obs?' · '+p.obs:''}`,
+    vlr:'—'
+  }));
+  const rowsColh = DB.colheitas.map(c=>({
+    id: c.id, origem:'colheita', data: c.data||'',
+    tipo:'🌾 Colheita',
+    badgeCls:'badge-o',
+    nome: c.plantacaoNome,
+    detalhe:`${c.qtd} ${c.unidade} · ${c.destino}${c.obs?' · '+c.obs:''}`,
+    vlr: c.valor>0 ? fmtBRL(c.valor) : '—'
+  }));
+  const rowsTrato = DB.tratos.map(t=>({
+    id: t.id, origem:'trato', data: t.data||'',
+    tipo:`🧪 ${t.tipo}`,
+    badgeCls:'badge-b',
+    nome: t.plantacaoNome,
+    detalhe: t.obs || t.tipo,
+    vlr: t.custo>0 ? fmtBRL(t.custo) : '—'
+  }));
+  const rows = [...rowsPlt, ...rowsColh, ...rowsTrato]
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+
+  const tbl = document.getElementById('tbl-plantacoes');
+  if(!rows.length) {
+    tbl.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-style:italic">Nenhum registro ainda.</td></tr>';
+    return;
+  }
+
+  const acaoBtns = r => {
+    if(r.origem==='plantacao') return `
+      <button class="btn-acao btn-editar" onclick="editarPlantacaoModal('${r.id}')">✏️ Editar</button>
+      <button class="btn-acao btn-del"    onclick="confirmarDeletePlantacao('${r.id}')">🗑</button>`;
+    if(r.origem==='colheita') return `
+      <button class="btn-acao btn-editar" onclick="editarColheita('${r.id}')">✏️ Editar</button>
+      <button class="btn-acao btn-del"    onclick="confirmarDeleteColheita('${r.id}')">🗑</button>`;
+    return `
+      <button class="btn-acao btn-editar" onclick="editarTrato('${r.id}')">✏️ Editar</button>
+      <button class="btn-acao btn-del"    onclick="confirmarDeleteTrato('${r.id}')">🗑</button>`;
+  };
+
+  tbl.innerHTML = rows.slice(0,150).map(r=>`<tr>
+    <td>${r.data ? fmtDate(r.data) : '—'}</td>
+    <td><span class="badge ${r.badgeCls}">${r.tipo}</span></td>
+    <td><b>${r.nome}</b></td>
+    <td style="font-size:.82rem">${r.detalhe}</td>
+    <td style="font-weight:700">${r.vlr}</td>
+    <td><div class="acoes">${acaoBtns(r)}</div></td>
+  </tr>`).join('');
+}
+
+// ============================================================
+//  LANÇAMENTOS
+// ============================================================
+function lancar(tipo) {
+  let obj;
+  if(tipo==='gasto') {
+    const v = +document.getElementById('g-valor').value;
+    if(!v){ toast('⚠️ Informe o valor','var(--vermelho)'); return; }
+    obj = { id:uid(), tipo:'gasto',
+      categoria: document.getElementById('g-cat').value,
+      descricao: document.getElementById('g-desc').value,
+      valor: v,
+      data: document.getElementById('g-data').value||hoje(),
+      ref: document.getElementById('g-ref').value,
+      pgto: document.getElementById('g-pgto').value,
+    };
+    // limpar
+    ['g-desc','g-valor'].forEach(i=>document.getElementById(i).value='');
+  } else {
+    const v = +document.getElementById('r-valor').value;
+    if(!v){ toast('⚠️ Informe o valor','var(--vermelho)'); return; }
+    obj = { id:uid(), tipo:'receita',
+      categoria: document.getElementById('r-cat').value,
+      descricao: document.getElementById('r-desc').value,
+      valor: v,
+      data: document.getElementById('r-data').value||hoje(),
+      comprador: document.getElementById('r-comprador').value,
+      qtd: document.getElementById('r-qtd').value,
+    };
+    ['r-desc','r-valor','r-comprador','r-qtd'].forEach(i=>document.getElementById(i).value='');
+  }
+  DB.lancamentos.unshift(obj);
+  save(DB);
+  toast(tipo==='gasto'?'💸 Gasto registrado!':'💰 Receita registrada!');
+  popularSelAnos();
+}
+
+// ============================================================
+//  FINANCEIRO
+// ============================================================
+let mesSelecionadoFin = null; // null = todos
+
+function renderFinanceiro() {
+  const ano = +(document.getElementById('anoSelFin')?.value||new Date().getFullYear());
+  const lancAno = DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString()));
+
+  // KPIs
+  const totalRec = lancAno.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
+  const totalGas = lancAno.filter(l=>l.tipo==='gasto').reduce((s,l)=>s+l.valor,0);
+  const saldo = totalRec - totalGas;
+  const kpis = document.getElementById('kpis-fin');
+  kpis.innerHTML = `
+    <div class="kpi g"><div class="kpi-lbl">Receitas ${ano}</div><div class="kpi-val">${fmtBRL(totalRec)}</div></div>
+    <div class="kpi r"><div class="kpi-lbl">Gastos ${ano}</div><div class="kpi-val">${fmtBRL(totalGas)}</div></div>
+    <div class="kpi ${saldo>=0?'g':'r'}"><div class="kpi-lbl">Resultado ${ano}</div><div class="kpi-val">${fmtBRL(saldo)}</div><div class="kpi-sub">${saldo>=0?'✅ Positivo':'⚠️ Negativo'}</div></div>
+    <div class="kpi o"><div class="kpi-lbl">Lançamentos</div><div class="kpi-val">${lancAno.length}</div><div class="kpi-sub">no ano</div></div>`;
+
+  // Mes selector
+  const mesSel = document.getElementById('mes-sel-fin');
+  mesSel.innerHTML = '<button class="mes-btn'+(mesSelecionadoFin===null?' active':'')+'" onclick="filtrarMesFin(null)">Todos</button>';
+  MESES.forEach((m,i)=>{
+    const btn = document.createElement('button');
+    btn.className='mes-btn'+(mesSelecionadoFin===i?' active':'');
+    btn.textContent=MESES_CURTO[i];
+    btn.onclick=()=>filtrarMesFin(i);
+    mesSel.appendChild(btn);
+  });
+
+  renderFinCharts(ano);
+  renderExtrato(ano);
+}
+
+function filtrarMesFin(i) {
+  mesSelecionadoFin = i;
+  document.querySelectorAll('#mes-sel-fin .mes-btn').forEach((b,j)=>b.classList.toggle('active', j===0?i===null:j-1===i));
+  const ano = +(document.getElementById('anoSelFin')?.value||new Date().getFullYear());
+  renderExtrato(ano);
+}
+
+function renderFinCharts(ano) {
+  const mRec = Array(12).fill(0), mGas = Array(12).fill(0);
+  DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString())).forEach(l=>{
+    const m = parseInt(l.data.slice(5,7))-1;
+    if(l.tipo==='receita') mRec[m]+=l.valor;
+    else mGas[m]+=l.valor;
+  });
+
+  newChart('chartFinAnual','bar',{
+    labels:MESES_CURTO,
+    datasets:[
+      {label:'Receitas',data:mRec,backgroundColor:VERDE,borderRadius:5},
+      {label:'Gastos',data:mGas,backgroundColor:VERM,borderRadius:5},
+    ]
+  },{plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')}}}});
+
+  // pizza gastos por categoria
+  const catMap = {};
+  DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString())&&l.tipo==='gasto').forEach(l=>{
+    const cat = l.categoria||'Outros';
+    catMap[cat]=(catMap[cat]||0)+l.valor;
+  });
+  const labels = Object.keys(catMap);
+  newChart('chartFinPizza','doughnut',{
+    labels, datasets:[{data:labels.map(k=>catMap[k]), backgroundColor:PALETAS, borderWidth:0}]
+  },{plugins:{legend:{position:'right',labels:{font:{size:10}}}},cutout:'55%'});
+}
+
+function renderExtrato(ano) {
+  let lancs = DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString()));
+  if(mesSelecionadoFin!==null) {
+    const m = (mesSelecionadoFin+1).toString().padStart(2,'0');
+    lancs = lancs.filter(l=>l.data?.slice(5,7)===m);
+    document.getElementById('extrato-label').textContent=`${MESES[mesSelecionadoFin]} de ${ano}`;
+  } else {
+    document.getElementById('extrato-label').textContent=`Todos os meses de ${ano}`;
+  }
+  const tbl = document.getElementById('tbl-financeiro');
+  if(!lancs.length) { tbl.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-style:italic">Nenhum lançamento neste período.</td></tr>'; return; }
+  tbl.innerHTML = lancs.map(l=>`<tr>
+    <td>${fmtDate(l.data)}</td>
+    <td><span class="badge ${l.tipo==='receita'?'badge-g':'badge-r'}">${l.tipo==='receita'?'Receita':'Gasto'}</span></td>
+    <td style="font-size:.78rem">${l.categoria||'—'}</td>
+    <td>${l.descricao||l.obs||'—'}</td>
+    <td style="font-weight:900;color:${l.tipo==='receita'?'var(--verde2)':'var(--vermelho)'}">
+      ${l.tipo==='receita'?'+':'-'} ${fmtBRL(l.valor)}
+    </td>
+    <td><div class="acoes">
+      <button class="btn-acao btn-editar" onclick="editarLancamento('${l.id}')">✏️ Editar</button>
+      <button class="btn-acao btn-del" onclick="confirmarDeleteLanc('${l.id}')">🗑</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+// ============================================================
+//  PAINEL
+// ============================================================
+function renderPainel() {
+  const ano = +(document.getElementById('anoSel')?.value||new Date().getFullYear());
+  const lancAno = DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString()));
+  const totalRec = lancAno.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
+  const totalGas = lancAno.filter(l=>l.tipo==='gasto').reduce((s,l)=>s+l.valor,0);
+  const saldo = totalRec-totalGas;
+  const b = DB.animais.bovino, p=DB.animais.peixe, a=DB.animais.ave;
+  const totalBovino = b.boi+b.vaca+b.bezerro;
+  const totalAves = a.galinha+a.galo+a.pintinho+a.pato;
+  const plantAtivas = DB.plantacoes.filter(x=>x.ativa!==false&&x.status!=='Encerrado').length;
+
+  document.getElementById('chart-ano-label').textContent='Ano '+ano;
+  document.getElementById('anoAtual').textContent=ano;
+
+  const kpis = document.getElementById('kpis-financeiro');
+  kpis.innerHTML = `
+    <div class="kpi g"><div class="kpi-lbl">Receitas ${ano}</div><div class="kpi-val">${totalRec?fmtBRL(totalRec):'<span class="kpi-empty">Sem dados</span>'}</div></div>
+    <div class="kpi r"><div class="kpi-lbl">Gastos ${ano}</div><div class="kpi-val">${totalGas?fmtBRL(totalGas):'<span class="kpi-empty">Sem dados</span>'}</div></div>
+    <div class="kpi ${saldo>=0?'g':'r'}"><div class="kpi-lbl">Resultado</div><div class="kpi-val">${lancAno.length?fmtBRL(saldo):'<span class="kpi-empty">Sem dados</span>'}</div><div class="kpi-sub">${lancAno.length?'do sítio em '+ano:''}</div></div>
+    <div class="kpi o"><div class="kpi-lbl">Bovinos</div><div class="kpi-val">${totalBovino||'<span class="kpi-empty">0</span>'}</div><div class="kpi-sub">cabeças</div></div>
+    <div class="kpi b"><div class="kpi-lbl">Aves</div><div class="kpi-val">${totalAves||'<span class="kpi-empty">0</span>'}</div><div class="kpi-sub">galinhas, galos...</div></div>
+    <div class="kpi g"><div class="kpi-lbl">Plantações Ativas</div><div class="kpi-val">${plantAtivas}</div><div class="kpi-sub">cultivos em andamento</div></div>`;
+
+  renderPainelAnimais();
+
+  // Plantações no painel
+  const pltDiv = document.getElementById('painel-plantacoes');
+  const ativas = DB.plantacoes.filter(x=>x.ativa!==false&&x.status!=='Encerrado');
+  if(!ativas.length) { pltDiv.innerHTML='<div class="empty-state"><div class="eicon">🌱</div><p>Nenhuma plantação registrada. Vá em <b>Plantações</b> para cadastrar.</p></div>'; }
+  else {
+    pltDiv.innerHTML=`<div class="tbl-card" style="margin-bottom:18px"><table><thead><tr><th>Plantação</th><th>Status</th><th>Área</th><th>Plantio</th><th>Prev. Colheita</th><th>Obs.</th></tr></thead><tbody>
+      ${ativas.map(p=>`<tr><td><b>${p.nome}</b></td><td><span class="badge badge-g">${p.status}</span></td><td>${p.area} ${p.unidade}</td><td>${fmtDate(p.dataPlantio)}</td><td>${fmtDate(p.dataColheita)}</td><td>${p.obs||'—'}</td></tr>`).join('')}
+    </tbody></table></div>`;
+  }
+
+  // Charts painel
+  const mRec=Array(12).fill(0), mGas=Array(12).fill(0);
+  lancAno.forEach(l=>{
+    const m=parseInt(l.data?.slice(5,7)||0)-1;
+    if(m>=0){ if(l.tipo==='receita') mRec[m]+=l.valor; else mGas[m]+=l.valor; }
+  });
+  newChart('chartRecGasto','bar',{
+    labels:MESES_CURTO,
+    datasets:[{label:'Receitas',data:mRec,backgroundColor:VERDE,borderRadius:5},{label:'Gastos',data:mGas,backgroundColor:VERM,borderRadius:5}]
+  },{plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')}}}});
+
+  const catMap={};
+  lancAno.filter(l=>l.tipo==='gasto').forEach(l=>{catMap[l.categoria||'Outros']=(catMap[l.categoria||'Outros']||0)+l.valor;});
+  const labs=Object.keys(catMap);
+  if(labs.length) {
+    newChart('chartPizza','doughnut',{labels:labs,datasets:[{data:labs.map(k=>catMap[k]),backgroundColor:PALETAS,borderWidth:0}]},{plugins:{legend:{position:'right',labels:{font:{size:10}}}},cutout:'55%'});
+  } else { destroyChart('chartPizza'); }
+
+  // ultimos
+  const tbl=document.getElementById('tbl-ultimos');
+  if(!DB.lancamentos.length){ tbl.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:#aaa;font-style:italic">Nenhum lançamento. Use a aba Lançamentos.</td></tr>'; return; }
+  tbl.innerHTML=DB.lancamentos.slice(0,5).map(l=>`<tr>
+    <td>${fmtDate(l.data)}</td>
+    <td><span class="badge ${l.tipo==='receita'?'badge-g':'badge-r'}">${l.tipo==='receita'?'Receita':'Gasto'}</span></td>
+    <td style="font-size:.78rem">${l.categoria||'—'}</td>
+    <td>${l.descricao||'—'}</td>
+    <td style="font-weight:900;color:${l.tipo==='receita'?'var(--verde2)':'var(--vermelho)'}">
+      ${l.tipo==='receita'?'+':'-'} ${fmtBRL(l.valor)}
+    </td>
+  </tr>`).join('');
+}
+
+function renderPainelAnimais() {
+  const b=DB.animais.bovino, p=DB.animais.peixe, a=DB.animais.ave;
+  const grid=document.getElementById('painel-animais');
+  grid.innerHTML=`
+    <div class="inv-card verde"><div class="inv-icon">🐂</div><div class="inv-nome">Bois</div><div class="inv-qtd">${b.boi}</div></div>
+    <div class="inv-card verde"><div class="inv-icon">🐄</div><div class="inv-nome">Vacas</div><div class="inv-qtd">${b.vaca}</div></div>
+    <div class="inv-card verde"><div class="inv-icon">🐮</div><div class="inv-nome">Bezerros/as</div><div class="inv-qtd">${b.bezerro}</div></div>
+    <div class="inv-card azul"><div class="inv-icon">🐟</div><div class="inv-nome">${p.especie||'Peixes'}</div><div class="inv-qtd">${p.qtd}</div><div class="inv-unidade">${p.tanques} tanque(s)</div></div>
+    <div class="inv-card ouro"><div class="inv-icon">🐓</div><div class="inv-nome">Galinhas</div><div class="inv-qtd">${a.galinha}</div></div>
+    <div class="inv-card ouro"><div class="inv-icon">🐔</div><div class="inv-nome">Galos</div><div class="inv-qtd">${a.galo}</div></div>
+    ${a.pintinho?`<div class="inv-card ouro"><div class="inv-icon">🐣</div><div class="inv-nome">Pintinhos</div><div class="inv-qtd">${a.pintinho}</div></div>`:''}
+    ${a.pato?`<div class="inv-card terra"><div class="inv-icon">🦆</div><div class="inv-nome">Patos</div><div class="inv-qtd">${a.pato}</div></div>`:''}
+  `;
+}
+
+// ============================================================
+//  RELATÓRIOS
+// ============================================================
+function renderRelatorios() {
+  const ano = +(document.getElementById('anoSelRel')?.value||new Date().getFullYear());
+  const lancAno = DB.lancamentos.filter(l=>l.data?.startsWith(ano.toString()));
+  const totalRec = lancAno.filter(l=>l.tipo==='receita').reduce((s,l)=>s+l.valor,0);
+  const totalGas = lancAno.filter(l=>l.tipo==='gasto').reduce((s,l)=>s+l.valor,0);
+  const saldo = totalRec-totalGas;
+  const margem = totalRec>0?((saldo/totalRec)*100).toFixed(1):0;
+
+  const kpis = document.getElementById('kpis-rel');
+  kpis.innerHTML = `
+    <div class="kpi g"><div class="kpi-lbl">Receita Total ${ano}</div><div class="kpi-val">${fmtBRL(totalRec)}</div></div>
+    <div class="kpi r"><div class="kpi-lbl">Total de Gastos ${ano}</div><div class="kpi-val">${fmtBRL(totalGas)}</div></div>
+    <div class="kpi ${saldo>=0?'g':'r'}"><div class="kpi-lbl">Resultado Líquido</div><div class="kpi-val">${fmtBRL(saldo)}</div></div>
+    <div class="kpi o"><div class="kpi-lbl">Margem</div><div class="kpi-val">${margem}%</div><div class="kpi-sub">do que entrou ficou</div></div>`;
+
+  // gráficos
+  const mRec=Array(12).fill(0),mGas=Array(12).fill(0),mSaldo=Array(12).fill(0);
+  lancAno.forEach(l=>{
+    const m=parseInt(l.data?.slice(5,7)||0)-1;
+    if(m>=0){ if(l.tipo==='receita') mRec[m]+=l.valor; else mGas[m]+=l.valor; }
+  });
+  let acum=0;
+  const mAcum=MESES_CURTO.map((_,i)=>{ acum+=(mRec[i]-mGas[i]); return +acum.toFixed(2); });
+
+  newChart('chartSaldo','line',{
+    labels:MESES_CURTO,
+    datasets:[{label:'Saldo Acumulado',data:mAcum,borderColor:VERDE,backgroundColor:'rgba(46,125,50,0.1)',fill:true,tension:.4,borderWidth:2.5,pointRadius:4}]
+  },{scales:{y:{ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')}}}});
+
+  const recMap={};
+  lancAno.filter(l=>l.tipo==='receita').forEach(l=>{recMap[l.categoria||'Outros']=(recMap[l.categoria||'Outros']||0)+l.valor;});
+  const rLabs=Object.keys(recMap);
+  if(rLabs.length) newChart('chartRecOrigem','doughnut',{labels:rLabs,datasets:[{data:rLabs.map(k=>recMap[k]),backgroundColor:PALETAS,borderWidth:0}]},{cutout:'55%'});
+
+  const catMap={};
+  lancAno.filter(l=>l.tipo==='gasto').forEach(l=>{catMap[l.categoria||'Outros']=(catMap[l.categoria||'Outros']||0)+l.valor;});
+  const cLabs=Object.keys(catMap);
+  if(cLabs.length) newChart('chartGastoCat','doughnut',{labels:cLabs,datasets:[{data:cLabs.map(k=>catMap[k]),backgroundColor:PALETAS,borderWidth:0}]},{cutout:'55%'});
+
+  // DRE
+  const tbl=document.getElementById('tbl-dre');
+  let acumDRE=0;
+  tbl.innerHTML=MESES.map((m,i)=>{
+    const r=+mRec[i].toFixed(2), g=+mGas[i].toFixed(2), res=r-g;
+    acumDRE+=res;
+    if(!r&&!g) return `<tr><td>${m}</td><td style="color:#aaa">—</td><td style="color:#aaa">—</td><td style="color:#aaa">—</td><td style="color:#aaa">—</td></tr>`;
+    return `<tr>
+      <td><b>${m}</b></td>
+      <td style="color:var(--verde2);font-weight:700">${fmtBRL(r)}</td>
+      <td style="color:var(--vermelho);font-weight:700">${fmtBRL(g)}</td>
+      <td style="color:${res>=0?'var(--verde2)':'var(--vermelho)'};font-weight:900">${fmtBRL(res)}</td>
+      <td style="color:${acumDRE>=0?'var(--verde1)':'var(--vermelho)'};font-weight:900">${fmtBRL(acumDRE)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+//  MODAL GENÉRICO
+// ============================================================
+function openModal(titulo, corpo, botoes) {
+  document.getElementById('modal-titulo').textContent = titulo;
+  document.getElementById('modal-corpo').innerHTML = corpo;
+  document.getElementById('modal-btns').innerHTML = '';
+  botoes.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ' + (b.cls||'btn-g');
+    btn.textContent = b.label;
+    btn.onclick = b.fn;
+    document.getElementById('modal-btns').appendChild(btn);
+  });
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('show'); }
+
+function modalConfirmarDelete(msg, onConfirm) {
+  openModal('⚠️ Confirmar exclusão',
+    `<p>${msg}</p>`,
+    [
+      { label:'🗑 Excluir', cls:'btn-r', fn: () => { onConfirm(); closeModal(); } },
+      { label:'Cancelar', cls:'btn-g', fn: closeModal }
+    ]
+  );
+}
+
+// ---- LANÇAMENTOS FINANCEIROS ----
+function confirmarDeleteLanc(id) {
+  modalConfirmarDelete('Deseja excluir este lançamento? Esta ação não pode ser desfeita.', () => {
+    DB.lancamentos = DB.lancamentos.filter(l => l.id !== id);
+    save(DB); toast('🗑 Lançamento excluído'); renderFinanceiro(); renderPainel();
+  });
+}
+
+function editarLancamento(id) {
+  const l = DB.lancamentos.find(x => x.id === id);
+  if (!l) return;
+  const corpo = `
+    <div class="fg"><label>Data</label><input type="date" id="el-data" value="${l.data||''}"></div>
+    <div class="fg"><label>Descrição</label><input type="text" id="el-desc" value="${l.descricao||l.obs||''}"></div>
+    <div class="fg"><label>Valor (R$)</label><input type="number" step="0.01" id="el-valor" value="${l.valor||0}"></div>
+    <div class="fg"><label>Categoria</label><input type="text" id="el-cat" value="${l.categoria||''}"></div>`;
+  openModal('✏️ Editar Lançamento', corpo, [
+    { label:'💾 Salvar', cls:'btn-g', fn: () => {
+      l.data = document.getElementById('el-data').value || l.data;
+      l.descricao = document.getElementById('el-desc').value;
+      l.valor = +document.getElementById('el-valor').value || l.valor;
+      l.categoria = document.getElementById('el-cat').value || l.categoria;
+      save(DB); closeModal(); toast('✅ Lançamento atualizado!'); renderFinanceiro(); renderPainel();
+    }},
+    { label:'Cancelar', cls:'btn-o', fn: closeModal }
+  ]);
+}
+
+// ---- EVENTOS DE ANIMAIS ----
+function confirmarDeleteEvento(id) {
+  modalConfirmarDelete('Deseja excluir este evento? Esta ação não pode ser desfeita.', () => {
+    DB.eventos = DB.eventos.filter(e => e.id !== id);
+    save(DB); toast('🗑 Evento excluído'); renderAnimais();
+  });
+}
+
+function editarEvento(id) {
+  const e = DB.eventos.find(x => x.id === id);
+  if (!e) return;
+  const animais = ['Boi','Vaca','Bezerro/a','Peixe','Galinha','Galo','Pintinho','Pato'];
+  const eventos = ['Vacinação','Nascimento','Morte','Venda','Compra','Tratamento Veterinário','Pesagem','Despesca','Postura (ovos)','Outro'];
+  const corpo = `
+    <div class="fg"><label>Data</label><input type="date" id="ee-data" value="${e.data||''}"></div>
+    <div class="fg"><label>Animal</label><select id="ee-animal">${animais.map(a=>`<option${a===e.animal?' selected':''}>${a}</option>`).join('')}</select></div>
+    <div class="fg"><label>Tipo de Evento</label><select id="ee-tipo">${eventos.map(t=>`<option${t===e.tipo?' selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="fg"><label>Quantidade</label><input type="number" id="ee-qtd" value="${e.qtd||0}"></div>
+    <div class="fg"><label>Observação</label><input type="text" id="ee-obs" value="${e.obs||''}"></div>`;
+  openModal('✏️ Editar Evento Animal', corpo, [
+    { label:'💾 Salvar', cls:'btn-g', fn: () => {
+      e.data   = document.getElementById('ee-data').value || e.data;
+      e.animal = document.getElementById('ee-animal').value;
+      e.tipo   = document.getElementById('ee-tipo').value;
+      e.qtd    = +document.getElementById('ee-qtd').value || 0;
+      e.obs    = document.getElementById('ee-obs').value;
+      save(DB); closeModal(); toast('✅ Evento atualizado!'); renderAnimais();
+    }},
+    { label:'Cancelar', cls:'btn-o', fn: closeModal }
+  ]);
+}
+
+// ---- PLANTAÇÕES (editar/excluir pelo histórico) ----
+function confirmarDeletePlantacao(id) {
+  modalConfirmarDelete('Deseja excluir esta plantação do histórico? Os registros de colheita e manejo vinculados não serão removidos.', () => {
+    DB.plantacoes = DB.plantacoes.filter(p => p.id !== id);
+    save(DB); toast('🗑 Plantação excluída'); renderPlantacoes(); popularSelectPlantacoes();
+  });
+}
+
+function editarPlantacaoModal(id) {
+  const p = DB.plantacoes.find(x => x.id === id);
+  if (!p) return;
+  const culturas = ['Pepino','Chuchu','Quiabo','Alface','Couve','Tomate','Mandioca','Milho (consumo)','Feijão','Abóbora','Inhame','Batata-doce','Outra'];
+  const unidades = ['m²','pés','linhas','hectare'];
+  const statusList = ['Plantado','Brotando','Crescendo','Floração','Frutificação','Pronto p/ Colheita','Colhendo','Encerrado'];
+  const corpo = `
+    <div class="fg"><label>Cultura</label>
+      <select id="ep-cultura">${culturas.map(c=>`<option${c===p.cultura?' selected':''}>${c}</option>`).join('')}</select>
+    </div>
+    <div class="fg"><label>Nome / Identificação</label>
+      <input type="text" id="ep-nome" value="${p.nome||''}">
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Área</label><input type="number" id="ep-area" value="${p.area||0}"></div>
+      <div class="fg"><label>Unidade</label>
+        <select id="ep-unidade">${unidades.map(u=>`<option${u===p.unidade?' selected':''}>${u}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Data do Plantio</label><input type="date" id="ep-plantio" value="${p.dataPlantio||''}"></div>
+      <div class="fg"><label>Prev. Colheita</label><input type="date" id="ep-colheita" value="${p.dataColheita||''}"></div>
+    </div>
+    <div class="fg"><label>Status</label>
+      <select id="ep-status">${statusList.map(s=>`<option${s===p.status?' selected':''}>${s}</option>`).join('')}</select>
+    </div>
+    <div class="fg"><label>Observações</label>
+      <input type="text" id="ep-obs" value="${p.obs||''}">
+    </div>`;
+  openModal('✏️ Editar Plantação', corpo, [
+    { label:'💾 Salvar', cls:'btn-g', fn: () => {
+      p.cultura      = document.getElementById('ep-cultura').value;
+      p.nome         = document.getElementById('ep-nome').value || p.nome;
+      p.area         = +document.getElementById('ep-area').value || p.area;
+      p.unidade      = document.getElementById('ep-unidade').value;
+      p.dataPlantio  = document.getElementById('ep-plantio').value || p.dataPlantio;
+      p.dataColheita = document.getElementById('ep-colheita').value;
+      p.status       = document.getElementById('ep-status').value;
+      p.obs          = document.getElementById('ep-obs').value;
+      save(DB); closeModal(); toast('✅ Plantação atualizada!'); renderPlantacoes();
+    }},
+    { label:'Cancelar', cls:'btn-o', fn: closeModal }
+  ]);
+}
+
+// ---- COLHEITAS ----
+function confirmarDeleteColheita(id) {
+  modalConfirmarDelete('Deseja excluir este registro de colheita?', () => {
+    DB.colheitas = DB.colheitas.filter(c => c.id !== id);
+    save(DB); toast('🗑 Colheita excluída'); renderPlantacoes();
+  });
+}
+
+function editarColheita(id) {
+  const c = DB.colheitas.find(x => x.id === id);
+  if (!c) return;
+  const unidades = ['kg','unidades','caixas','dúzias','sacos'];
+  const destinos = ['Consumo próprio','Venda direta','Feira','Atravessador','Doação'];
+  const corpo = `
+    <div class="fg"><label>Plantação</label><input type="text" id="ec-plt" value="${c.plantacaoNome||''}"></div>
+    <div class="fg"><label>Data</label><input type="date" id="ec-data" value="${c.data||''}"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Quantidade</label><input type="number" step="0.1" id="ec-qtd" value="${c.qtd||0}"></div>
+      <div class="fg"><label>Unidade</label><select id="ec-unid">${unidades.map(u=>`<option${u===c.unidade?' selected':''}>${u}</option>`).join('')}</select></div>
+    </div>
+    <div class="fg"><label>Destino</label><select id="ec-dest">${destinos.map(d=>`<option${d===c.destino?' selected':''}>${d}</option>`).join('')}</select></div>
+    <div class="fg"><label>Valor recebido (R$)</label><input type="number" step="0.01" id="ec-valor" value="${c.valor||0}"></div>
+    <div class="fg"><label>Observação</label><input type="text" id="ec-obs" value="${c.obs||''}"></div>`;
+  openModal('✏️ Editar Colheita', corpo, [
+    { label:'💾 Salvar', cls:'btn-g', fn: () => {
+      c.plantacaoNome = document.getElementById('ec-plt').value || c.plantacaoNome;
+      c.data    = document.getElementById('ec-data').value || c.data;
+      c.qtd     = +document.getElementById('ec-qtd').value || 0;
+      c.unidade = document.getElementById('ec-unid').value;
+      c.destino = document.getElementById('ec-dest').value;
+      c.valor   = +document.getElementById('ec-valor').value || 0;
+      c.obs     = document.getElementById('ec-obs').value;
+      save(DB); closeModal(); toast('✅ Colheita atualizada!'); renderPlantacoes();
+    }},
+    { label:'Cancelar', cls:'btn-o', fn: closeModal }
+  ]);
+}
+
+// ---- TRATOS / MANEJOS ----
+function confirmarDeleteTrato(id) {
+  modalConfirmarDelete('Deseja excluir este registro de manejo/trato?', () => {
+    DB.tratos = DB.tratos.filter(t => t.id !== id);
+    save(DB); toast('🗑 Manejo excluído'); renderPlantacoes();
+  });
+}
+
+function editarTrato(id) {
+  const t = DB.tratos.find(x => x.id === id);
+  if (!t) return;
+  const tipos = ['Adubação','Irrigação','Capina','Defensivo / Pulverização','Poda','Replantio','Controle de pragas','Outro'];
+  const corpo = `
+    <div class="fg"><label>Plantação</label><input type="text" id="et-plt" value="${t.plantacaoNome||''}"></div>
+    <div class="fg"><label>Data</label><input type="date" id="et-data" value="${t.data||''}"></div>
+    <div class="fg"><label>Tipo de Manejo</label><select id="et-tipo">${tipos.map(tp=>`<option${tp===t.tipo?' selected':''}>${tp}</option>`).join('')}</select></div>
+    <div class="fg"><label>Custo (R$)</label><input type="number" step="0.01" id="et-custo" value="${t.custo||0}"></div>
+    <div class="fg"><label>Observação</label><input type="text" id="et-obs" value="${t.obs||''}"></div>`;
+  openModal('✏️ Editar Manejo / Trato', corpo, [
+    { label:'💾 Salvar', cls:'btn-g', fn: () => {
+      t.plantacaoNome = document.getElementById('et-plt').value || t.plantacaoNome;
+      t.data  = document.getElementById('et-data').value || t.data;
+      t.tipo  = document.getElementById('et-tipo').value;
+      t.custo = +document.getElementById('et-custo').value || 0;
+      t.obs   = document.getElementById('et-obs').value;
+      save(DB); closeModal(); toast('✅ Manejo atualizado!'); renderPlantacoes();
+    }},
+    { label:'Cancelar', cls:'btn-o', fn: closeModal }
+  ]);
+}
+
+// ============================================================
+//  AUTH
+// ============================================================
+// ⚠️ ALTERE A SENHA ABAIXO PARA A SUA SENHA PESSOAL:
+const SENHA_EDITOR = 'sitio2025';
+
+let modoEditor = false;
+
+function tentarLogin() {
+  const val = document.getElementById('authSenha').value;
+  if (val === SENHA_EDITOR) {
+    modoEditor = true;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('badgeModo').textContent = '✏️ Editor';
+    document.getElementById('badgeModo').className = 'pill editor';
+    document.getElementById('badgeModo').style.display = '';
+    document.getElementById('btnSairEditor').style.display = '';
+    document.body.classList.remove('modo-visitante');
+    initApp();
+  } else {
+    const err = document.getElementById('authErro');
+    err.textContent = '❌ Senha incorreta. Tente novamente.';
+    document.getElementById('authSenha').value = '';
+    document.getElementById('authSenha').focus();
+    setTimeout(() => { err.textContent = ''; }, 3000);
+  }
+}
+
+function entrarVisitante() {
+  modoEditor = false;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('badgeModo').textContent = '👁 Visitante';
+  document.getElementById('badgeModo').className = 'pill visitante';
+  document.getElementById('badgeModo').style.display = '';
+  document.getElementById('btnSairEditor').style.display = 'none';
+  document.body.classList.add('modo-visitante');
+  initApp();
+}
+
+function sairEditor() {
+  modoEditor = false;
+  document.getElementById('badgeModo').textContent = '👁 Visitante';
+  document.getElementById('badgeModo').className = 'pill visitante';
+  document.getElementById('btnSairEditor').style.display = 'none';
+  document.body.classList.add('modo-visitante');
+  toast('🔒 Modo editor encerrado. Agora em modo visitante.');
+}
+
+function toggleSenha() {
+  const inp = document.getElementById('authSenha');
+  const eye = document.getElementById('authEye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁'; }
+  inp.focus();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+function initApp() {
+  const hoje = new Date();
+  document.getElementById('dataHoje').textContent = hoje.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  const hj = hoje.toISOString().slice(0,10);
+  ['g-data','r-data','evento-data','plt-data-plantio','colh-data','trato-data'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=hj; });
+  popularSelAnos();
+  renderPainel();
+  renderAnimais();
+  renderPlantacoes();
+}
+
+// Focar no campo de senha ao carregar
+window.addEventListener('load', () => {
+  document.getElementById('authSenha').focus();
+});
+</script>
+</body>
+</html>
